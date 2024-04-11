@@ -68,8 +68,8 @@ public class MyGame extends VariableFrameRateGame
 	@Override
 	public void loadShapes()
 	{	torS = new Torus(0.5f, 0.2f, 48);
-		ghostS = new ImportedModel("car.obj");
-		dolS = new ImportedModel("car.obj");
+		ghostS = new ImportedModel("green_car.obj");
+		dolS = new ImportedModel("green_car.obj");
 		linxS = new Line(new Vector3f(0f,0f,0f), new Vector3f(3f,0f,0f));
 		linyS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,3f,0f));
 		linzS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,0f,-3f));
@@ -78,8 +78,8 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void loadTextures()
-	{	doltx = new TextureImage("car.png");
-		ghostT = new TextureImage("car.png");
+	{	doltx = new TextureImage("green_car.png");
+		ghostT = new TextureImage("green_car.jpg");
 		hillsMap = new TextureImage("hillsmap.png");
 		hills = new TextureImage("hills.jpg");
 	}
@@ -93,7 +93,7 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void buildObjects()
-	{	Matrix4f initialTranslation, initialRotation, initialScale;
+	{		Matrix4f initialTranslation, initialRotation, initialScale;
 
 		// build dolphin avatar
 		avatar = new GameObject(GameObject.root(), dolS, doltx);
