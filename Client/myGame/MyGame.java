@@ -46,9 +46,10 @@ public class MyGame extends VariableFrameRateGame
 	private Matrix4f initialTranslation, initialRotation, initialScale;
 	private double startTime, prevTime, elapsedTime, amt;
 
-	private GameObject tor, avatar, x, y, z, terr;
+	private GameObject tor, avatar, x, y, z, terr, audience;
 	private ObjShape torS, ghostS, dolS, linxS, linyS, linzS, terrS;
-	private TextureImage doltx, ghostT, hillsMap, hills;
+	private AnimatedShape audienceS;
+	private TextureImage doltx, ghostT, hillsMap, hills, audienceT;
 	private Light light;
 
 	private String serverAddress;
@@ -110,6 +111,10 @@ public class MyGame extends VariableFrameRateGame
 
 		npcShape = new ImportedModel("greenCar.obj");
 		npcShape2 = new ImportedModel("car.obj");
+
+		audienceS = new AnimatedShape("npc.rkm", "npc.rks");
+		audienceS.loadAnimation("clap", "clap.rka");
+		audienceS.loadAnimation("jumping", "jumping.rka");
 	}
 
 	@Override
@@ -122,6 +127,8 @@ public class MyGame extends VariableFrameRateGame
 
 		npcTex = new TextureImage("greenCar.jpg");
 		npcTex2 = new TextureImage("car.png");
+
+		audienceT = new TextureImage("npc.jpg");
 	}
 
 	@Override
@@ -177,6 +184,9 @@ public class MyGame extends VariableFrameRateGame
 		terr.setHeightMap(hillsMap);
 		terr.getRenderStates().setTiling(1);
 		terr.getRenderStates().setTileFactor(10);
+		
+		//build audience
+		audience = new GameObject(GameObject.root(), audienceS, audienceT);
 	}
 
 	@Override
@@ -419,6 +429,10 @@ public class MyGame extends VariableFrameRateGame
 		float height = terr.getHeight(loc.x(), loc.z());
 		avatar.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
 		carNew.setLocalLocation(new Vector3f(loc2.x(), height, loc2.z()));
+
+
+		//update audience
+		audienceS.updateAnimation();
 	}
 
 	public void setEarParameters() {
@@ -519,6 +533,23 @@ public class MyGame extends VariableFrameRateGame
 			case KeyEvent.VK_SPACE:
 			{	System.out.println("starting physics");
 				running = !running;
+				break;
+			}
+			case KeyEvent.VK_1:
+			{
+				audienceS.stopAnimation();
+				audienceS.playAnimation("jumping", 0.5f, AnimatedShape.EndType.LOOP, 0);
+				break;
+			}
+			case KeyEvent.VK_2:
+			{
+				audienceS.stopAnimation();
+				audienceS.playAnimation("clap", 0.5f, AnimatedShape.EndType.LOOP, 0);
+				break;
+			}
+			case KeyEvent.VK_0:
+			{
+				audienceS.stopAnimation();
 				break;
 			}
 		}
