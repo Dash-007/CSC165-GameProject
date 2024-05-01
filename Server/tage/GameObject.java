@@ -278,7 +278,7 @@ public class GameObject
 	public void setLocalTranslation(Matrix4f m) { localTranslation = new Matrix4f(m); update(); }
 
 	/** copies a specified Matrix4f into this GameObject's local rotation matrix */
-	public void setLocalRotation(Matrix4f l) { localRotation = new Matrix4f(l); update(); }
+	public void setLocalRotation(Matrix4f initialRotation) { localRotation = new Matrix4f(initialRotation); update(); }
 
 	/** copies a specified Matrix4f into this GameObject's local scale matrix */
 	public void setLocalScale(Matrix4f s) { localScale = new Matrix4f(s); update(); }

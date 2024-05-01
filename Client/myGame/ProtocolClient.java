@@ -16,6 +16,7 @@ public class ProtocolClient extends GameConnectionClient
 	private MyGame game;
 	private GhostManager ghostManager;
 	private UUID id;
+	private GhostNPC ghostNPC, ghostNPC2;
 	
 	public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException 
 	{	super(remoteAddr, remotePort, protocolType);
@@ -25,6 +26,67 @@ public class ProtocolClient extends GameConnectionClient
 	}
 	
 	public UUID getID() { return id; }
+
+	// --- Ghost NPC Section ---
+	private void createGhostNPC(Vector3f position) throws IOException {
+		if (ghostNPC == null) {
+			ghostNPC = new GhostNPC(0, game.getNPCshape(), game.getNPCtexture(), position);
+		} 
+		if (ghostNPC2 == null) {
+			position.x = 9.0f;
+			ghostNPC2 = new GhostNPC(1, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+	}
+
+	private void updateGhostNPC(Vector3f position, double rotation) {
+		boolean gs;
+
+		if (ghostNPC == null) {
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		} 
+		if (ghostNPC2 == null) {
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		ghostNPC.setPosition(position);
+		ghostNPC.setSize(0.2f);
+		ghostNPC.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 2.5f;
+		ghostNPC2.setPosition(position);
+		ghostNPC2.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC2.setRotation(rotation);
+
+		honk(ghostNPC);
+		honk(ghostNPC2);
+	}
+
+	// Honk if avatar is near
+	public void honk(GhostNPC npc) {
+		// Calculate the distance between the avatar and the ghost
+		float distance = npc.getWorldLocation().distance(game.getAvatar().getWorldLocation());
+
+		if (distance < 2.0) {
+			if (!game.getHonk().getIsPlaying()) {
+				game.getHonk().play();
+			}
+		}
+	}
 	
 	@Override
 	protected void processPacket(Object message)
@@ -105,7 +167,75 @@ public class ProtocolClient extends GameConnectionClient
 					Float.parseFloat(messageTokens[4]));
 				
 				ghostManager.updateGhostAvatar(ghostID, ghostPosition);
-	}	}	}
+			}
+
+			// handle NPC ghosts
+			if (messageTokens[0].compareTo("createNPC") == 0) {
+				// create a new ghost NPC
+				// Parse out the position into a Vector3f
+				Vector3f ghostPosition = new Vector3f(
+					Float.parseFloat(messageTokens[1]),
+					Float.parseFloat(messageTokens[2]),
+					Float.parseFloat(messageTokens[3]));
+				try {
+					createGhostNPC(ghostPosition);
+				} catch (IOException e) {
+					System.out.println("error creating npc");
+				}
+			}
+
+			// trying to move npc
+			if (messageTokens[0].compareTo("npcinfo") == 0) {
+				// move a ghost NPC
+				// Parse out the position into a Vector3f
+				Vector3f ghostPosition = new Vector3f(
+					Float.parseFloat(messageTokens[1]),
+					Float.parseFloat(messageTokens[2]),
+					Float.parseFloat(messageTokens[3]));
+				double rotation = Double.parseDouble(messageTokens[4]);
+				updateGhostNPC(ghostPosition, rotation);
+			}
+
+			// Handle MNPC message
+			// Format: (mnpc,remoteId,x,y,z,gsize)
+			if (messageTokens[0].compareTo("mnpc") == 0)
+			{
+				// move a ghost NPC
+				// Parse out the id into a UUID
+				UUID ghostID = UUID.fromString(messageTokens[1]);
+			
+				// Parse out the position into a Vector3f
+				Vector3f ghostPosition = new Vector3f(
+					Float.parseFloat(messageTokens[2]),
+					Float.parseFloat(messageTokens[3]),
+					Float.parseFloat(messageTokens[4]));
+			
+				// Parse out the size
+				double gsize = Double.parseDouble(messageTokens[5]);
+			
+				updateGhostNPC(ghostPosition, gsize);
+			}
+			
+			// Handle ISNEAR message
+			// Format: (isnear,remoteId)
+			if (messageTokens[0].compareTo("isnear") == 0) {
+				// check if the player is near the ghost NPC
+				Vector3f playerPosition = new Vector3f(
+				Float.parseFloat(messageTokens[1]),
+				Float.parseFloat(messageTokens[2]),
+				Float.parseFloat(messageTokens[3]));
+				double distance = Double.parseDouble(messageTokens[4]);
+				if (game.getPlayerPosition().distance(playerPosition) < distance) {
+					try {
+						sendPacket(new String("isnear," + id.toString()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+	} else {
+		System.out.println("invalid message format: " + strMessage);
+	}	}
 	
 	// The initial message from the game client requesting to join the 
 	// server. localId is a unique identifier for the client. Recommend 
@@ -129,7 +259,7 @@ public class ProtocolClient extends GameConnectionClient
 		{	e.printStackTrace();
 	}	}
 	
-	// Informs the server of the client’s Avatar’s position. The server 
+	// Informs the server of the clientâ€™s Avatarâ€™s position. The server 
 	// takes this message and forwards it to all other clients registered 
 	// with the server.
 	// Message Format: (create,localId,x,y,z) where x, y, and z represent the position
