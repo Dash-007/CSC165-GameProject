@@ -66,13 +66,14 @@ public class MyGame extends VariableFrameRateGame
 
 	private PhysicsEngine physicsEngine;
 	private PhysicsObject avt, car, planeP, npcOne, npcTwo;
+	private PhysicsObject cone1P, cone2P, cone3P, cone4P, cone5P, cone6P, cone7P, cone8P, cone9P, cone10P;
 
 	private boolean running = false;
 	private float vals[] = new float[16];
 
 	// For Audio
 	private IAudioManager audioMgr;
-	private Sound engineSound, oceanSound, carSound, honkSound;
+	private Sound engineSound, oceanSound, carSound, honkSound, bgSound;
 	private Vector3f previousPosition = new Vector3f();
 
 	// NPCs
@@ -99,6 +100,11 @@ public class MyGame extends VariableFrameRateGame
 	private boolean winS = false, winM = false;
 
 	String time;
+
+	// Obstacles
+	private GameObject cone1, cone2, cone3, cone4, cone5, cone6, cone7, cone8, cone9, cone10;
+	private ObjShape coneShape;
+	private TextureImage coneTexture;
 
 	public MyGame(String serverAddress, int serverPort, String protocol)
 	{	super();
@@ -129,6 +135,8 @@ public class MyGame extends VariableFrameRateGame
 		linzS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,0f,-3f));
 		terrS = new TerrainPlane(1025);
 
+		coneShape = new ImportedModel("cone.obj");
+
 		raceLineShape = new ImportedModel("raceLine.obj");
 
 		npcShape = new ImportedModel("greenCar.obj");
@@ -149,6 +157,8 @@ public class MyGame extends VariableFrameRateGame
 
 		raceLineTexture = new TextureImage("Start.png");
 		endLineTexture = new TextureImage("Finish.png");
+
+		coneTexture = new TextureImage("cone.png");
 
 		npcTex = new TextureImage("greenCar.jpg");
 		npcTex2 = new TextureImage("car.png");
@@ -226,7 +236,68 @@ public class MyGame extends VariableFrameRateGame
 		terr.setHeightMap(hillsMap);
 		terr.getRenderStates().setTiling(1);
 		terr.getRenderStates().setTileFactor(10);
-		
+
+		// build obstacles
+		cone1 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.15f,70.0f);
+		cone1.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone1.setLocalScale(initialScale);
+
+		cone2 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.10f,45.0f);
+		cone2.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone2.setLocalScale(initialScale);
+
+		cone3 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,30.0f);
+		cone3.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone3.setLocalScale(initialScale);
+
+		cone4 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,15.0f);
+		cone4.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone4.setLocalScale(initialScale);
+
+		cone5 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,0.0f);
+		cone5.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone5.setLocalScale(initialScale);
+
+		cone6 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,-15.0f);
+		cone6.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone6.setLocalScale(initialScale);
+
+		cone7 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,-30.0f);
+		cone7.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone7.setLocalScale(initialScale);
+
+		cone8 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,-45.0f);
+		cone8.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone8.setLocalScale(initialScale);
+
+		cone9 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,-60.0f);
+		cone9.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone9.setLocalScale(initialScale);
+
+		cone10 = new GameObject(GameObject.root(), coneShape, coneTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.0f,-75.0f);
+		cone10.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		cone10.setLocalScale(initialScale);
+				
 		//build audience
 		audience = new GameObject(GameObject.root(), audienceS, audienceT);
 	}
@@ -264,23 +335,26 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void loadSounds() {
-		AudioResource resource1, resource2, resource3, resource4;
+		AudioResource resource1, resource2, resource3, resource4, resource5;
 		audioMgr = engine.getAudioManager();
 		
 		resource1 = audioMgr.createAudioResource("assets/sounds/engine.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource2 = audioMgr.createAudioResource("assets/sounds/bonk.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource3 = audioMgr.createAudioResource("assets/sounds/car.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource4 = audioMgr.createAudioResource("assets/sounds/honk.wav", AudioResourceType.AUDIO_SAMPLE);
+		resource5 = audioMgr.createAudioResource("assets/sounds/bg.wav", AudioResourceType.AUDIO_SAMPLE);
 		
 		engineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 100, true);
 		oceanSound = new Sound(resource2, SoundType.SOUND_EFFECT, 100, false);
 		carSound = new Sound(resource3, SoundType.SOUND_EFFECT, 0, false);
 		honkSound = new Sound(resource4, SoundType.SOUND_EFFECT, 100, false);
+		bgSound = new Sound(resource5, SoundType.SOUND_EFFECT, 75, true);
 
 		engineSound.initialize(audioMgr);
 		oceanSound.initialize(audioMgr);
 		carSound.initialize(audioMgr);
 		honkSound.initialize(audioMgr);
+		bgSound.initialize(audioMgr);
 
 		engineSound.setMaxDistance(10.0f);
 		engineSound.setMinDistance(0.5f);
@@ -334,6 +408,86 @@ public class MyGame extends VariableFrameRateGame
 		car.setBounciness(0.8f);
 		carNew.setPhysicsObject(car);
 
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone1.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone1P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone1P.setBounciness(0.8f);
+		cone1.setPhysicsObject(cone1P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone2.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone2P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone2P.setBounciness(0.8f);
+		cone2.setPhysicsObject(cone2P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone3.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone3P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone3P.setBounciness(0.8f);
+		cone3.setPhysicsObject(cone3P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone4.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone4P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone4P.setBounciness(0.8f);
+		cone4.setPhysicsObject(cone4P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone5.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone5P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone5P.setBounciness(0.8f);
+		cone5.setPhysicsObject(cone5P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone6.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone6P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone6P.setBounciness(0.8f);
+		cone6.setPhysicsObject(cone6P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone7.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone7P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone7P.setBounciness(0.8f);
+		cone7.setPhysicsObject(cone7P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone8.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone8P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone8P.setBounciness(0.8f);
+		cone8.setPhysicsObject(cone8P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone9.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone9P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone9P.setBounciness(0.8f);
+		cone9.setPhysicsObject(cone9P);
+
+		rotationMatrix = new Matrix4f().rotateY((float) Math.toRadians(180));
+		translation = new Matrix4f(cone10.getLocalTranslation());
+		newTranslation = rotationMatrix.mulLocal(translation);
+		tempTransform = toDoubleArray(newTranslation.get(vals));
+		cone10P = (engine.getSceneGraph()).addPhysicsCone(mass, tempTransform, radius, height);
+		cone10P.setBounciness(0.8f);
+		cone10.setPhysicsObject(cone10P);
+		
 		translation = new Matrix4f(terr.getLocalTranslation());
 		tempTransform = toDoubleArray(translation.get(vals));
 		planeP = (engine.getSceneGraph()).addPhysicsStaticPlane(tempTransform, up, 0.0f);
@@ -341,7 +495,7 @@ public class MyGame extends VariableFrameRateGame
 		terr.setPhysicsObject(planeP);
 
 		engine.enableGraphicsWorldRender();
-		engine.enablePhysicsWorldRender();
+		// engine.enablePhysicsWorldRender();
 
 		// build some action objects for doing things in response to user input
 		Vector3f fwdForce = new Vector3f(0.0f, 0.0f, -2.5f); // Apply force in the negative Z direction
@@ -372,14 +526,29 @@ public class MyGame extends VariableFrameRateGame
 			net.java.games.input.Component.Identifier.Key.RIGHT,
 			rightTurnAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
+		im.associateActionWithAllGamepads(
+			net.java.games.input.Component.Identifier.Axis.RZ,
+			fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(
+			net.java.games.input.Component.Identifier.Axis.Z,
+			bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(
+			net.java.games.input.Component.Identifier.Axis.X,
+			leftTurnAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(
+			net.java.games.input.Component.Identifier.Axis.X,
+			rightTurnAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
 		// initialize sound settings
 		engineSound.setLocation(carNew.getWorldLocation());
 		oceanSound.setLocation(carNew.getWorldLocation());
 		carSound.setLocation(avatar.getWorldLocation());
+		honkSound.setLocation(avatar.getWorldLocation());
 
 		setEarParameters();
 
 		engineSound.play();
+		bgSound.play();
 
 		// oceanSound.play();
 
@@ -399,7 +568,8 @@ public class MyGame extends VariableFrameRateGame
 	public void selectAnAvatar() {
 		positionCameraBehindAvatar();
 		if (selectAvatar) {
-			initialTranslation = (new Matrix4f()).translation(11.5f,0.5f,80.0f);
+			float height = terr.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z());
+			initialTranslation = (new Matrix4f()).translation(11.5f,height,80.0f);
 			avatar.setLocalTranslation(initialTranslation);
 			initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
 			avatar.setLocalRotation(initialRotation);
@@ -495,6 +665,7 @@ public class MyGame extends VariableFrameRateGame
 			}
 
 			engineSound.setLocation(carNew.getWorldLocation());
+			bgSound.setLocation(avatar.getWorldLocation());
 
 			// update sound
 			if (engineSound.getLocation() != avatar.getWorldLocation()) {
@@ -565,6 +736,37 @@ public class MyGame extends VariableFrameRateGame
 				ghostLight.setLocation(new Vector3f(gm.getGhostAvatarPosition(ghostID).x(), 2.0f, gm.getGhostAvatarPosition(ghostID).z()));
 			}
 
+			// update obstacles
+			float terrainHeight = terr.getHeight(cone1.getWorldLocation().x(), cone1.getWorldLocation().z());
+			cone1.setLocalLocation(new Vector3f(cone1.getWorldLocation().x(), terrainHeight, cone1.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone2.getWorldLocation().x(), cone2.getWorldLocation().z());
+			cone2.setLocalLocation(new Vector3f(cone2.getWorldLocation().x(), terrainHeight, cone2.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone3.getWorldLocation().x(), cone3.getWorldLocation().z());
+			cone3.setLocalLocation(new Vector3f(cone3.getWorldLocation().x(), terrainHeight, cone3.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone4.getWorldLocation().x(), cone4.getWorldLocation().z());
+			cone4.setLocalLocation(new Vector3f(cone4.getWorldLocation().x(), terrainHeight, cone4.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone5.getWorldLocation().x(), cone5.getWorldLocation().z());
+			cone5.setLocalLocation(new Vector3f(cone5.getWorldLocation().x(), terrainHeight, cone5.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone6.getWorldLocation().x(), cone6.getWorldLocation().z());
+			cone6.setLocalLocation(new Vector3f(cone6.getWorldLocation().x(), terrainHeight, cone6.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone7.getWorldLocation().x(), cone7.getWorldLocation().z());
+			cone7.setLocalLocation(new Vector3f(cone7.getWorldLocation().x(), terrainHeight, cone7.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone8.getWorldLocation().x(), cone8.getWorldLocation().z());
+			cone8.setLocalLocation(new Vector3f(cone8.getWorldLocation().x(), terrainHeight, cone8.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone9.getWorldLocation().x(), cone9.getWorldLocation().z());
+			cone9.setLocalLocation(new Vector3f(cone9.getWorldLocation().x(), terrainHeight, cone9.getWorldLocation().z()));
+
+			terrainHeight = terr.getHeight(cone10.getWorldLocation().x(), cone10.getWorldLocation().z());
+			cone10.setLocalLocation(new Vector3f(cone10.getWorldLocation().x(), terrainHeight, cone10.getWorldLocation().z()));
+			
 			// check winner
 			if (avatar.getWorldLocation().z() < -75.0f) {
 				if (ghostID != null) {
@@ -720,6 +922,8 @@ public class MyGame extends VariableFrameRateGame
 				{
 					avatar.setShape(ghostS);
 					avatar.setTextureImage(ghostT);
+					Matrix4f rotate = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
+					carNew.setLocalRotation(rotate);
 					avatarName = "";
 					avatarName = "ghost";
 					update();
@@ -835,4 +1039,13 @@ public class MyGame extends VariableFrameRateGame
 	public void setScore(int score) { this.score = score; }
 
 	public void setUUID(UUID id) { this.ghostID = id; }
+
+	public GameObject getTerrain() {
+		return terr;
+	}
+
+	public void setStart(boolean finish) {
+		selectAvatar = false;
+		update();
+	}
 }

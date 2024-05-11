@@ -18,7 +18,7 @@ public class ProtocolClient extends GameConnectionClient
 	private MyGame game;
 	private GhostManager ghostManager;
 	private UUID id;
-	private GhostNPC ghostNPC, ghostNPC2, ghostNPC3;
+	private GhostNPC ghostNPC, ghostNPC2, ghostNPC3, ghostNPC4, ghostNPC5, ghostNPC6, ghostNPC7, ghostNPC8, ghostNPC9, ghostNPC10, ghostNPC11, ghostNPC12, ghostNPC13, ghostNPC14, ghostNPC15;
 	
 	public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException 
 	{	super(remoteAddr, remotePort, protocolType);
@@ -42,12 +42,64 @@ public class ProtocolClient extends GameConnectionClient
 			position.x = 9.0f;
 			ghostNPC3 = new GhostNPC(2, game.getNPC2shape(), game.getNPC2texture(), position);
 		}
+		if (ghostNPC4 == null) {
+			position.x = 9.0f;
+			ghostNPC4 = new GhostNPC(3, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC5 == null) {
+			position.x = 9.0f;
+			ghostNPC5 = new GhostNPC(4, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC6 == null) {
+			position.x = 9.0f;
+			ghostNPC6 = new GhostNPC(5, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC7 == null) {
+			position.x = 9.0f;
+			ghostNPC7 = new GhostNPC(6, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC8 == null) {
+			position.x = 9.0f;
+			ghostNPC8 = new GhostNPC(7, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC9 == null) {
+			position.x = 9.0f;
+			ghostNPC9 = new GhostNPC(8, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC10 == null) {
+			position.x = 9.0f;
+			ghostNPC10 = new GhostNPC(9, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC11 == null) {
+			position.x = 9.0f;
+			ghostNPC11 = new GhostNPC(10, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC12 == null) {
+			position.x = 9.0f;
+			ghostNPC12 = new GhostNPC(11, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC13 == null) {
+			position.x = 9.0f;
+			ghostNPC13 = new GhostNPC(12, game.getNPCshape(), game.getNPCtexture(), position);
+		}
+		if (ghostNPC14 == null) {
+			position.x = 9.0f;
+			ghostNPC14 = new GhostNPC(13, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC15 == null) {
+			position.x = 9.0f;
+			ghostNPC15 = new GhostNPC(14, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
 	}
 
 	private void updateGhostNPC(Vector3f position, double rotation) {
 		boolean gs;
 
+		position.z -= 50.0f;
+
 		if (ghostNPC == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
 			try {
 				createGhostNPC(position);
 			} catch (IOException e) {
@@ -55,6 +107,8 @@ public class ProtocolClient extends GameConnectionClient
 			}
 		} 
 		if (ghostNPC2 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
 			position.x = 9.0f;
 			try {
 				createGhostNPC(position);
@@ -64,6 +118,63 @@ public class ProtocolClient extends GameConnectionClient
 		}
 
 		if (ghostNPC3 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC4 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+		
+		if (ghostNPC5 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+		
+		if (ghostNPC6 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+		
+		if (ghostNPC7 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+		
+		if (ghostNPC8 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
 			position.x = 9.0f;
 			try {
 				createGhostNPC(position);
@@ -72,12 +183,93 @@ public class ProtocolClient extends GameConnectionClient
 			}
 		}
 
+		if (ghostNPC9 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC10 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC11 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC12 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC13 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC14 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		if (ghostNPC15 == null) {
+			float height = game.getTerrain().getHeight(position.x, position.z);
+			position.y = height;
+			position.x = 11.5f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
+		float height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
 		ghostNPC.setPosition(position);
 		ghostNPC.setSize(0.2f);
 		ghostNPC.setRotation(rotation);
 
 		position.x = 9.0f;
 		position.z += 2.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
 
 		ghostNPC2.setPosition(position);
 		ghostNPC2.setSize(0.2f);
@@ -88,8 +280,10 @@ public class ProtocolClient extends GameConnectionClient
 		}
 		ghostNPC2.setRotation(rotation);
 
-		position.x = 9.0f;
-		position.z += 5.0f;
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
 
 		ghostNPC3.setPosition(position);
 		ghostNPC3.setSize(0.2f);
@@ -100,9 +294,189 @@ public class ProtocolClient extends GameConnectionClient
 		}
 		ghostNPC3.setRotation(rotation);
 
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC4.setPosition(position);
+		ghostNPC4.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC4.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC5.setPosition(position);
+		ghostNPC5.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC5.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC6.setPosition(position);
+		ghostNPC6.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC6.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC7.setPosition(position);
+		ghostNPC7.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC7.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC8.setPosition(position);
+		ghostNPC8.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC8.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC9.setPosition(position);
+		ghostNPC9.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC9.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC10.setPosition(position);
+		ghostNPC10.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC10.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC11.setPosition(position);
+		ghostNPC11.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC11.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC12.setPosition(position);
+		ghostNPC12.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC12.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC13.setPosition(position);
+		ghostNPC13.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC13.setRotation(rotation);
+
+		position.x = 9.0f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC14.setPosition(position);
+		ghostNPC14.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC14.setRotation(rotation);
+
+		position.x = 11.5f;
+		position.z += 7.5f;
+		height = game.getTerrain().getHeight(position.x, position.z);
+		position.y = height;
+
+		ghostNPC15.setPosition(position);
+		ghostNPC15.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC15.setRotation(rotation);
+
 		honk(ghostNPC);
 		honk(ghostNPC2);
 		honk(ghostNPC3);
+		honk(ghostNPC4);
+		honk(ghostNPC5);
+		honk(ghostNPC6);
+		honk(ghostNPC7);
+		honk(ghostNPC8);
+		honk(ghostNPC9);
+		honk(ghostNPC10);
+		honk(ghostNPC11);
+		honk(ghostNPC12);
+		honk(ghostNPC13);
+		honk(ghostNPC14);
+		honk(ghostNPC15);
 	}
 
 	// Honk if avatar is near
@@ -115,6 +489,7 @@ public class ProtocolClient extends GameConnectionClient
 			if (!game.getHonk().getIsPlaying()) {
 				game.getHonk().play();
 			}
+			
 		}
 
 		if (distance < 0.15) {
