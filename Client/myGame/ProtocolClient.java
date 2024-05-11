@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.Vector;
 import org.joml.*;
 
+import java.lang.Math;
+
 import tage.*;
 import tage.networking.client.GameConnectionClient;
 
@@ -16,7 +18,7 @@ public class ProtocolClient extends GameConnectionClient
 	private MyGame game;
 	private GhostManager ghostManager;
 	private UUID id;
-	private GhostNPC ghostNPC, ghostNPC2;
+	private GhostNPC ghostNPC, ghostNPC2, ghostNPC3;
 	
 	public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException 
 	{	super(remoteAddr, remotePort, protocolType);
@@ -35,6 +37,10 @@ public class ProtocolClient extends GameConnectionClient
 		if (ghostNPC2 == null) {
 			position.x = 9.0f;
 			ghostNPC2 = new GhostNPC(1, game.getNPC2shape(), game.getNPC2texture(), position);
+		}
+		if (ghostNPC3 == null) {
+			position.x = 9.0f;
+			ghostNPC3 = new GhostNPC(2, game.getNPC2shape(), game.getNPC2texture(), position);
 		}
 	}
 
@@ -57,12 +63,22 @@ public class ProtocolClient extends GameConnectionClient
 			}
 		}
 
+		if (ghostNPC3 == null) {
+			position.x = 9.0f;
+			try {
+				createGhostNPC(position);
+			} catch (IOException e) {
+				System.out.println("error creating npc");
+			}
+		}
+
 		ghostNPC.setPosition(position);
 		ghostNPC.setSize(0.2f);
 		ghostNPC.setRotation(rotation);
 
 		position.x = 9.0f;
 		position.z += 2.5f;
+
 		ghostNPC2.setPosition(position);
 		ghostNPC2.setSize(0.2f);
 		if (rotation >= 360) {
@@ -72,19 +88,38 @@ public class ProtocolClient extends GameConnectionClient
 		}
 		ghostNPC2.setRotation(rotation);
 
+		position.x = 9.0f;
+		position.z += 5.0f;
+
+		ghostNPC3.setPosition(position);
+		ghostNPC3.setSize(0.2f);
+		if (rotation >= 360) {
+			rotation -= 180;
+		} else {
+			rotation += 180;
+		}
+		ghostNPC3.setRotation(rotation);
+
 		honk(ghostNPC);
 		honk(ghostNPC2);
+		honk(ghostNPC3);
 	}
 
 	// Honk if avatar is near
 	public void honk(GhostNPC npc) {
 		// Calculate the distance between the avatar and the ghost
 		float distance = npc.getWorldLocation().distance(game.getAvatar().getWorldLocation());
+		int score = game.getScore();
 
 		if (distance < 2.0) {
 			if (!game.getHonk().getIsPlaying()) {
 				game.getHonk().play();
 			}
+		}
+
+		if (distance < 0.15) {
+			score -= 1.0;
+			game.setScore(score);
 		}
 	}
 	

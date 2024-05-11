@@ -46,10 +46,11 @@ public class MyGame extends VariableFrameRateGame
 	private Matrix4f initialTranslation, initialRotation, initialScale;
 	private double startTime, prevTime, elapsedTime, amt;
 
-	private GameObject tor, avatar, x, y, z, terr;
+	private GameObject tor, avatar, x, y, z, terr, audience;
 	private ObjShape torS, ghostS, dolS, linxS, linyS, linzS, terrS;
-	private TextureImage doltx, ghostT, hillsMap, hills;
-	private Light light;
+	private AnimatedShape audienceS;
+	private TextureImage doltx, ghostT, hillsMap, hills, audienceT;
+	private Light light, playerLight, ghostLight;
 
 	private String serverAddress;
 	private int serverPort;
@@ -64,7 +65,7 @@ public class MyGame extends VariableFrameRateGame
 	private TextureImage carTexture;
 
 	private PhysicsEngine physicsEngine;
-	private PhysicsObject avt, car, planeP;
+	private PhysicsObject avt, car, planeP, npcOne, npcTwo;
 
 	private boolean running = false;
 	private float vals[] = new float[16];
@@ -75,9 +76,29 @@ public class MyGame extends VariableFrameRateGame
 	private Vector3f previousPosition = new Vector3f();
 
 	// NPCs
+	private GameObject npc1, npc2;
 	private ObjShape npcShape, npcShape2;
 	private TextureImage npcTex, npcTex2;
-	
+
+	// Camera
+	private CameraOrbit3D orbitController;
+
+	// Select Avatar
+	private boolean selectAvatar = true;
+	private String avatarName = "dol";
+
+	private int score = 2;
+
+	// Race line
+	private GameObject raceLine, endLine;
+	private ObjShape raceLineShape;
+	private TextureImage raceLineTexture, endLineTexture;
+
+	private boolean finish = false;
+	private UUID ghostID;
+	private boolean winS = false, winM = false;
+
+	String time;
 
 	public MyGame(String serverAddress, int serverPort, String protocol)
 	{	super();
@@ -108,8 +129,14 @@ public class MyGame extends VariableFrameRateGame
 		linzS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,0f,-3f));
 		terrS = new TerrainPlane(1025);
 
+		raceLineShape = new ImportedModel("raceLine.obj");
+
 		npcShape = new ImportedModel("greenCar.obj");
 		npcShape2 = new ImportedModel("car.obj");
+
+		audienceS = new AnimatedShape("npc.rkm", "npc.rks");
+		audienceS.loadAnimation("clap", "clap.rka");
+		audienceS.loadAnimation("jumping", "jumping.rka");
 	}
 
 	@Override
@@ -120,8 +147,13 @@ public class MyGame extends VariableFrameRateGame
 		hillsMap = new TextureImage("hillsmap.png");
 		hills = new TextureImage("hills.jpg");
 
+		raceLineTexture = new TextureImage("Start.png");
+		endLineTexture = new TextureImage("Finish.png");
+
 		npcTex = new TextureImage("greenCar.jpg");
 		npcTex2 = new TextureImage("car.png");
+
+		audienceT = new TextureImage("npc.jpg");
 	}
 
 	@Override
@@ -137,7 +169,7 @@ public class MyGame extends VariableFrameRateGame
 
 		// build avatar
 		avatar = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(11.5f,0.1f,0.0f);
+		initialTranslation = (new Matrix4f()).translation(11.5f,0.5f,80.0f);
 		avatar.setLocalTranslation(initialTranslation);
 		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
 		avatar.setLocalRotation(initialRotation);
@@ -145,11 +177,11 @@ public class MyGame extends VariableFrameRateGame
 		avatar.setLocalScale(initialScale);
 
 		// build torus along X axis
-		tor = new GameObject(GameObject.root(), torS);
-		initialTranslation = (new Matrix4f()).translation(1,0,0);
-		tor.setLocalTranslation(initialTranslation);
-		initialScale = (new Matrix4f()).scaling(0.25f);
-		tor.setLocalScale(initialScale);
+		// tor = new GameObject(GameObject.root(), torS);
+		// initialTranslation = (new Matrix4f()).translation(1,0,0);
+		// tor.setLocalTranslation(initialTranslation);
+		// initialScale = (new Matrix4f()).scaling(0.25f);
+		// tor.setLocalScale(initialScale);
 
 		// build car
 		carNew = new GameObject(GameObject.root(), carShape, carTexture);
@@ -159,6 +191,23 @@ public class MyGame extends VariableFrameRateGame
 		carNew.setLocalRotation(initialRotation);
 		initialScale = (new Matrix4f()).scaling(0.20f);
 		carNew.setLocalScale(initialScale);
+
+		// build race line
+		raceLine = new GameObject(GameObject.root(), raceLineShape, raceLineTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.5f,75.0f);
+		raceLine.setLocalTranslation(initialTranslation);
+		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(90.0f));
+		raceLine.setLocalRotation(initialRotation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		raceLine.setLocalScale(initialScale);
+
+		endLine = new GameObject(GameObject.root(), raceLineShape, endLineTexture);
+		initialTranslation = (new Matrix4f()).translation(10.5f,0.5f,-75.0f);
+		endLine.setLocalTranslation(initialTranslation);
+		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(90.0f));
+		endLine.setLocalRotation(initialRotation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		endLine.setLocalScale(initialScale);
 
 		// add X,Y,-Z axes
 		x = new GameObject(GameObject.root(), linxS);
@@ -172,11 +221,14 @@ public class MyGame extends VariableFrameRateGame
 		terr = new GameObject(GameObject.root(), terrS, hills);
 		initialTranslation = (new Matrix4f()).translation(0f,-0.25f,0f);
 		terr.setLocalTranslation(initialTranslation);
-		initialScale = (new Matrix4f()).scaling(100.0f, 0.0f, 100.0f);
+		initialScale = (new Matrix4f()).scaling(100.0f, 5.0f, 100.0f);
 		terr.setLocalScale(initialScale);
 		terr.setHeightMap(hillsMap);
 		terr.getRenderStates().setTiling(1);
 		terr.getRenderStates().setTileFactor(10);
+		
+		//build audience
+		audience = new GameObject(GameObject.root(), audienceS, audienceT);
 	}
 
 	@Override
@@ -186,6 +238,28 @@ public class MyGame extends VariableFrameRateGame
 		light = new Light();
 		light.setLocation(new Vector3f(0f, 5f, 0f));
 		(engine.getSceneGraph()).addLight(light);
+
+		playerLight = new Light();
+		// playerLight.setAmbient(0.0f, 1.0f, 0.0f);
+		playerLight.setDiffuse(0.0f, 1.0f, 0.0f);
+		playerLight.setSpecular(0.0f, 1.0f, 0.0f);
+		playerLight.setLinearAttenuation(0.5f);
+		playerLight.setQuadraticAttenuation(0.1f);
+		Vector3f direction = new Vector3f(0, -1, 0);
+		playerLight.setDirection(direction);
+		playerLight.setLocation(new Vector3f(avatar.getWorldLocation().x(), 2.0f, avatar.getWorldLocation().z()));
+		(engine.getSceneGraph()).addLight(playerLight);
+
+		ghostLight = new Light();
+		ghostLight.setDiffuse(1.0f, 0.0f, 0.0f);
+		ghostLight.setSpecular(1.0f, 0.0f, 0.0f);
+		ghostLight.setLinearAttenuation(0.5f);
+		ghostLight.setQuadraticAttenuation(0.1f);
+		Vector3f ghostDirection = new Vector3f(0, -1, 0);
+		ghostLight.setDirection(ghostDirection);
+		ghostLight.setLocation(new Vector3f(avatar.getWorldLocation().x(), 2.0f, avatar.getWorldLocation().z()));
+		(engine.getSceneGraph()).addLight(ghostLight);
+
 	}
 
 	@Override
@@ -227,6 +301,10 @@ public class MyGame extends VariableFrameRateGame
 
 		// ----------------- INPUTS SECTION -----------------------------
 		im = engine.getInputManager();
+		String gpName = im.getFirstGamepadName();
+
+		Camera c = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
+		orbitController = new CameraOrbit3D(c, avatar, gpName, engine);
 
 		// initialize physics system
 		float[] gravity = {0.0f, -5.0f, 0.0f};
@@ -244,7 +322,7 @@ public class MyGame extends VariableFrameRateGame
 		Matrix4f translation = new Matrix4f(avatar.getLocalTranslation());
 		Matrix4f newTranslation = rotationMatrix.mulLocal(translation);
 		tempTransform = toDoubleArray(newTranslation.get(vals));
-		avt = (engine.getSceneGraph()).addPhysicsCapsuleX(mass, tempTransform, radius, height);		
+		avt = (engine.getSceneGraph()).addPhysicsCapsuleX(mass, tempTransform, radius, height);
 		avt.setBounciness(0.25f);
 		avatar.setPhysicsObject(avt);
 
@@ -309,6 +387,8 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	public GameObject getAvatar() { return avatar; }
+	public ObjShape getAvatarShape() { return dolS; }
+	public TextureImage getAvatarTexture() { return doltx; }
 	public ObjShape getNPCshape() { return npcShape; }
 	public TextureImage getNPCtexture() { return npcTex; }
 	public ObjShape getNPC2shape() { return npcShape2; }
@@ -316,109 +396,193 @@ public class MyGame extends VariableFrameRateGame
 
 	public Sound getHonk() { return honkSound; }
 
+	public void selectAnAvatar() {
+		positionCameraBehindAvatar();
+		if (selectAvatar) {
+			initialTranslation = (new Matrix4f()).translation(11.5f,0.5f,80.0f);
+			avatar.setLocalTranslation(initialTranslation);
+			initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
+			avatar.setLocalRotation(initialRotation);
+			initialScale = (new Matrix4f()).scaling(0.20f);
+			avatar.setLocalScale(initialScale);
+
+			if (finish) {
+				if (winS) {
+					String rematch = "Rematch?";
+					Vector3f hud1Color = new Vector3f(1,0,0);
+					(engine.getHUDmanager()).setHUD1("Time: " + time + " " + rematch, hud1Color, 860, 500);
+				} else if (winM) {
+					String rematch = "Rematch?";
+					String place = "You placed 1st";
+					Vector3f hud1Color = new Vector3f(1,0,0);
+					(engine.getHUDmanager()).setHUD1(rematch, hud1Color, 860, 500);
+
+					(engine.getHUDmanager()).setHUD2(place, hud1Color, 860, 520);
+				} else if (!winM) {
+					String rematch = "Rematch?";
+					String place = "You placed 2nd";
+					Vector3f hud1Color = new Vector3f(1,0,0);
+					(engine.getHUDmanager()).setHUD1(rematch, hud1Color, 860, 500);
+
+					(engine.getHUDmanager()).setHUD2(place, hud1Color, 860, 520);
+				} else {
+					String rematch = "";
+					Vector3f hud1Color = new Vector3f(1,0,0);
+					(engine.getHUDmanager()).setHUD1(rematch, hud1Color, 860, 500);
+				}
+
+				String select = "Select an Avatar";
+				Vector3f hud2Color = new Vector3f(1,0,0);
+				(engine.getHUDmanager()).setHUD2(select, hud2Color, 860, 100);
+			} else {
+				String select = "Select an Avatar";
+				Vector3f hud1Color = new Vector3f(1,0,0);
+				(engine.getHUDmanager()).setHUD1(select, hud1Color, 860, 100);
+			}
+		}
+	}
+
 	@Override
 	public void update()
-	{	elapsedTime = System.currentTimeMillis() - prevTime;
+	{	
+		// update avatar
+		selectAnAvatar();
+
+		elapsedTime = System.currentTimeMillis() - prevTime;
 		prevTime = System.currentTimeMillis();
 		amt = elapsedTime * 0.03;
 		Camera c = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
 		
-		// update physics
-		if (running) {
-			AxisAngle4f aa = new AxisAngle4f();
-			Matrix4f mat = new Matrix4f();
-			Matrix4f mat2 = new Matrix4f().identity();
-			Matrix4f mat3 = new Matrix4f().identity();
-			checkForCollisions();
-			physicsEngine.update((float) elapsedTime);
-			for (GameObject go:engine.getSceneGraph().getGameObjects()) {
-				if (go.getPhysicsObject() != null) {
-					// set translation
-					mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
-					Vector3f newTranslation = new Vector3f(mat.m30(), mat.m31(), mat.m32());
-					Vector3f currentTranslation = new Vector3f();
-					go.getLocalTranslation().getTranslation(currentTranslation);
-					Vector3f smoothTranslation = new Vector3f(currentTranslation);
-					smoothTranslation.lerp(newTranslation, 0.1f); // interpolate between current and new translation
-					mat2.setTranslation(smoothTranslation);
-					go.setLocalTranslation(mat2);
-					
-					// set rotation
-					mat.getRotation(aa);
-					Quaternionf newRotation = new Quaternionf().set(aa);
-					Quaternionf currentRotation = new Quaternionf();
-					go.getLocalRotation().getUnnormalizedRotation(currentRotation);
-					
-					// Only keep the y-axis rotation
-					newRotation.x = 0;
-					newRotation.z = 0;
-					currentRotation.x = 0;
-					currentRotation.z = 0;
-					
-					Quaternionf smoothRotation = new Quaternionf(currentRotation);
-					smoothRotation.slerp(newRotation, 0.1f); // interpolate between current and new rotation
-					mat3.rotation(smoothRotation);
-					go.setLocalRotation(mat3);
+		if (selectAvatar == false) {	
+			// update physics
+			if (running) {
+				AxisAngle4f aa = new AxisAngle4f();
+				Matrix4f mat = new Matrix4f();
+				Matrix4f mat2 = new Matrix4f().identity();
+				Matrix4f mat3 = new Matrix4f().identity();
+				checkForCollisions();
+				physicsEngine.update((float) elapsedTime);
+				for (GameObject go:engine.getSceneGraph().getGameObjects()) {
+					if (go.getPhysicsObject() != null) {
+						// set translation
+						mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
+						Vector3f newTranslation = new Vector3f(mat.m30(), mat.m31(), mat.m32());
+						Vector3f currentTranslation = new Vector3f();
+						go.getLocalTranslation().getTranslation(currentTranslation);
+						Vector3f smoothTranslation = new Vector3f(currentTranslation);
+						smoothTranslation.lerp(newTranslation, 0.1f); // interpolate between current and new translation
+						mat2.setTranslation(smoothTranslation);
+						go.setLocalTranslation(mat2);
+						
+						// set rotation
+						mat.getRotation(aa);
+						Quaternionf newRotation = new Quaternionf().set(aa);
+						Quaternionf currentRotation = new Quaternionf();
+						go.getLocalRotation().getUnnormalizedRotation(currentRotation);
+						
+						// Only keep the y-axis rotation
+						newRotation.x = 0;
+						newRotation.z = 0;
+						currentRotation.x = 0;
+						currentRotation.z = 0;
+						
+						Quaternionf smoothRotation = new Quaternionf(currentRotation);
+						smoothRotation.slerp(newRotation, 0.1f); // interpolate between current and new rotation
+						mat3.rotation(smoothRotation);
+						go.setLocalRotation(mat3);
+					}
+				}
+			}
+
+			engineSound.setLocation(carNew.getWorldLocation());
+
+			// update sound
+			if (engineSound.getLocation() != avatar.getWorldLocation()) {
+				float distance = 4 * engineSound.getLocation().distance(avatar.getWorldLocation());
+				if (distance < 100.0f) {
+					engineSound.setVolume(100 - (int)distance);
+				} else {
+					engineSound.setVolume(0);
+				}
+			}
+			setEarParameters();
+
+			// update sound
+			oceanSound.setLocation(carNew.getWorldLocation());
+			if (avatar.getWorldLocation().distance(carNew.getWorldLocation()) < 1.0f) {
+				oceanSound.play();
+			}
+			
+			Vector3f currentPos = avatar.getWorldLocation();
+			if (!currentPos.equals(previousPosition)) {
+				carSound.setLocation(currentPos);
+				if (!carSound.getIsPlaying()) {
+					carSound.play();
+				}
+			} else {
+				carSound.stop();
+			}
+
+			previousPosition = currentPos;
+
+			// build and set HUD
+			int elapsTimeSec = Math.round((float)(System.currentTimeMillis()-startTime)/1000.0f);
+			String elapsTimeStr = Integer.toString(elapsTimeSec);
+			String counterStr = Integer.toString(counter);
+			String dispStr1 = "Time = " + elapsTimeStr;
+			// String dispStr2 = "camera position = "
+			// 	+ (avatar.getWorldLocation()).x()
+			// 	+ ", " + (avatar.getWorldLocation()).y()
+			// 	+ ", " + (avatar.getWorldLocation()).z();
+			String dispStr2 = "Score = " + score;
+			Vector3f hud1Color = new Vector3f(1,0,0);
+			Vector3f hud2Color = new Vector3f(1,1,1);
+			(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
+			(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
+
+			// update inputs and camera
+			im.update((float)elapsedTime);
+			positionCameraBehindAvatar();
+			processNetworking((float)elapsedTime);
+
+			// update avatar altitude
+			Vector3f loc = avatar.getWorldLocation();
+			Vector3f loc2 = carNew.getWorldLocation();
+			float height = terr.getHeight(loc.x(), loc.z());
+			avatar.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+			carNew.setLocalLocation(new Vector3f(loc2.x(), height, loc2.z()));
+
+
+			//update audience
+			audienceS.updateAnimation();
+
+			// update camera
+			orbitController.updateCameraPosition();
+
+			// update Lights
+			playerLight.setLocation(new Vector3f(avatar.getWorldLocation().x(), 2.0f, avatar.getWorldLocation().z()));
+			if (ghostID != null) {
+				ghostLight.setLocation(new Vector3f(gm.getGhostAvatarPosition(ghostID).x(), 2.0f, gm.getGhostAvatarPosition(ghostID).z()));
+			}
+
+			// check winner
+			if (avatar.getWorldLocation().z() < -75.0f) {
+				if (ghostID != null) {
+					if (gm.getGhostAvatarPosition(ghostID).z() > avatar.getWorldLocation().z()) {
+						winM = true;
+					} else {
+						winM = false;
+					}
+					finish = true;
+					selectAvatar = true;
+				} else {
+					winS = true;
+					finish = true;
+					selectAvatar = true;
+					time = String.valueOf(elapsedTime);
 				}
 			}
 		}
-
-		engineSound.setLocation(carNew.getWorldLocation());
-
-		// update sound
-		if (engineSound.getLocation() != avatar.getWorldLocation()) {
-			float distance = 4 * engineSound.getLocation().distance(avatar.getWorldLocation());
-			if (distance < 100.0f) {
-				engineSound.setVolume(100 - (int)distance);
-			} else {
-				engineSound.setVolume(0);
-			}
-		}
-		setEarParameters();
-
-		// update sound
-		oceanSound.setLocation(carNew.getWorldLocation());
-		if (avatar.getWorldLocation().distance(carNew.getWorldLocation()) < 1.0f) {
-			oceanSound.play();
-		}
-		
-		Vector3f currentPos = avatar.getWorldLocation();
-		if (!currentPos.equals(previousPosition)) {
-			carSound.setLocation(currentPos);
-			if (!carSound.getIsPlaying()) {
-				carSound.play();
-			}
-		} else {
-			carSound.stop();
-		}
-
-		previousPosition = currentPos;
-
-		// build and set HUD
-		int elapsTimeSec = Math.round((float)(System.currentTimeMillis()-startTime)/1000.0f);
-		String elapsTimeStr = Integer.toString(elapsTimeSec);
-		String counterStr = Integer.toString(counter);
-		String dispStr1 = "Time = " + elapsTimeStr;
-		String dispStr2 = "camera position = "
-			+ (c.getLocation()).x()
-			+ ", " + (c.getLocation()).y()
-			+ ", " + (c.getLocation()).z();
-		Vector3f hud1Color = new Vector3f(1,0,0);
-		Vector3f hud2Color = new Vector3f(1,1,1);
-		//(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		//(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
-
-		// update inputs and camera
-		im.update((float)elapsedTime);
-		positionCameraBehindAvatar();
-		processNetworking((float)elapsedTime);
-
-		// update avatar altitude
-		Vector3f loc = avatar.getWorldLocation();
-		Vector3f loc2 = carNew.getWorldLocation();
-		float height = terr.getHeight(loc.x(), loc.z());
-		avatar.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
-		carNew.setLocalLocation(new Vector3f(loc2.x(), height, loc2.z()));
 	}
 
 	public void setEarParameters() {
@@ -477,49 +641,96 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void keyPressed(KeyEvent e)
-	{	switch (e.getKeyCode())
-		{	case KeyEvent.VK_W:
-			{	Vector3f oldPosition = avatar.getWorldLocation();
-				Vector4f fwdDirection = new Vector4f(0f,0f,1f,1f);
-				fwdDirection.mul(avatar.getWorldRotation());
-				fwdDirection.mul(0.25f);
-				Vector3f newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
-				avatar.setLocalLocation(newPosition);
-				protClient.sendMoveMessage(avatar.getWorldLocation());
-				break;
+	{	
+		if (!selectAvatar) {
+			switch (e.getKeyCode())
+			{	case KeyEvent.VK_W:
+				{	Vector3f oldPosition = avatar.getWorldLocation();
+					Vector4f fwdDirection = new Vector4f(0f,0f,1f,1f);
+					fwdDirection.mul(avatar.getWorldRotation());
+					fwdDirection.mul(0.25f);
+					Vector3f newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
+					avatar.setLocalLocation(newPosition);
+					protClient.sendMoveMessage(avatar.getWorldLocation());
+					break;
+				}
+				case KeyEvent.VK_S:
+				{	Vector3f oldPosition = avatar.getWorldLocation();
+					Vector4f fwdDirection = new Vector4f(0f,0f,1f,1f);
+					fwdDirection.mul(avatar.getWorldRotation());
+					fwdDirection.mul(-0.25f);
+					Vector3f newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
+					avatar.setLocalLocation(newPosition);
+					protClient.sendMoveMessage(avatar.getWorldLocation());
+					break;
+				}
+				case KeyEvent.VK_A:
+				{	Matrix4f oldRotation = new Matrix4f(avatar.getWorldRotation());
+					Vector4f oldUp = new Vector4f(0f,1f,0f,1f).mul(oldRotation);
+					Matrix4f rotAroundAvatarUp = new Matrix4f().rotation(0.1f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
+					Matrix4f newRotation = oldRotation;
+					newRotation.mul(rotAroundAvatarUp);
+					avatar.setLocalRotation(newRotation);
+					break;
+				}
+				case KeyEvent.VK_D:
+				{	Matrix4f oldRotation = new Matrix4f(avatar.getWorldRotation());
+					Vector4f oldUp = new Vector4f(0f,1f,0f,1f).mul(oldRotation);
+					Matrix4f rotAroundAvatarUp = new Matrix4f().rotation(-.1f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
+					Matrix4f newRotation = oldRotation;
+					newRotation.mul(rotAroundAvatarUp);
+					avatar.setLocalRotation(newRotation);
+					break;
+				}
+				case KeyEvent.VK_SPACE:
+				{	System.out.println("starting physics");
+					running = !running;
+					break;
+				}
+				case KeyEvent.VK_1:
+				{
+					audienceS.stopAnimation();
+					audienceS.playAnimation("jumping", 0.5f, AnimatedShape.EndType.LOOP, 0);
+					break;
+				}
+				case KeyEvent.VK_2:
+				{
+					audienceS.stopAnimation();
+					audienceS.playAnimation("clap", 0.5f, AnimatedShape.EndType.LOOP, 0);
+					break;
+				}
+				case KeyEvent.VK_0:
+				{
+					audienceS.stopAnimation();
+					break;
+				}
 			}
-			case KeyEvent.VK_S:
-			{	Vector3f oldPosition = avatar.getWorldLocation();
-				Vector4f fwdDirection = new Vector4f(0f,0f,1f,1f);
-				fwdDirection.mul(avatar.getWorldRotation());
-				fwdDirection.mul(-0.25f);
-				Vector3f newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
-				avatar.setLocalLocation(newPosition);
-				protClient.sendMoveMessage(avatar.getWorldLocation());
-				break;
-			}
-			case KeyEvent.VK_A:
-			{	Matrix4f oldRotation = new Matrix4f(avatar.getWorldRotation());
-				Vector4f oldUp = new Vector4f(0f,1f,0f,1f).mul(oldRotation);
-				Matrix4f rotAroundAvatarUp = new Matrix4f().rotation(0.1f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
-				Matrix4f newRotation = oldRotation;
-				newRotation.mul(rotAroundAvatarUp);
-				avatar.setLocalRotation(newRotation);
-				break;
-			}
-			case KeyEvent.VK_D:
-			{	Matrix4f oldRotation = new Matrix4f(avatar.getWorldRotation());
-				Vector4f oldUp = new Vector4f(0f,1f,0f,1f).mul(oldRotation);
-				Matrix4f rotAroundAvatarUp = new Matrix4f().rotation(-.1f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
-				Matrix4f newRotation = oldRotation;
-				newRotation.mul(rotAroundAvatarUp);
-				avatar.setLocalRotation(newRotation);
-				break;
-			}
-			case KeyEvent.VK_SPACE:
-			{	System.out.println("starting physics");
-				running = !running;
-				break;
+		} else {
+			switch (e.getKeyCode()) {
+				case KeyEvent.VK_1:
+				{
+					avatar.setShape(dolS);
+					avatar.setTextureImage(doltx);
+					avatarName = "";
+					avatarName = "dol";
+					update();
+					break;					
+				}
+				case KeyEvent.VK_2:
+				{
+					avatar.setShape(ghostS);
+					avatar.setTextureImage(ghostT);
+					avatarName = "";
+					avatarName = "ghost";
+					update();
+					break;
+				}
+				case KeyEvent.VK_3:
+				{
+					selectAvatar = false;
+					update();
+					break;
+				}
 			}
 		}
 		super.keyPressed(e);
@@ -616,4 +827,12 @@ public class MyGame extends VariableFrameRateGame
 			}
 		}
 	}
+
+	public String getAvatarName() { return avatarName; }
+
+	public int getScore() { return score; }
+
+	public void setScore(int score) { this.score = score; }
+
+	public void setUUID(UUID id) { this.ghostID = id; }
 }

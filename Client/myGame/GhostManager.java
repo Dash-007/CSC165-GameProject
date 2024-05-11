@@ -14,6 +14,7 @@ public class GhostManager
 {
 	private MyGame game;
 	private Vector<GhostAvatar> ghostAvatars = new Vector<GhostAvatar>();
+	private UUID ghostID;
 
 	public GhostManager(VariableFrameRateGame vfrg)
 	{	game = (MyGame)vfrg;
@@ -27,6 +28,8 @@ public class GhostManager
 		Matrix4f initialScale = (new Matrix4f()).scaling(0.25f);
 		newAvatar.setLocalScale(initialScale);
 		ghostAvatars.add(newAvatar);
+		this.ghostID = id;
+		game.setUUID(id);
 	}
 	
 	public void removeGhostAvatar(UUID id)
@@ -59,6 +62,25 @@ public class GhostManager
 		}
 		else
 		{	System.out.println("tried to update ghost avatar position, but unable to find ghost in list");
+		}
+	}
+
+	public UUID getGhostAvatarUUID(GhostAvatar ghostAvatar) {
+		if (ghostAvatar != null) {
+			return ghostAvatar.getID();
+		} else {
+			System.out.println("Ghost avatar is null");
+			return null;
+		}
+	}
+
+	public Vector3f getGhostAvatarPosition(UUID id) {
+		GhostAvatar ghostAvatar = findAvatar(id);
+		if (ghostAvatar != null) {
+			return ghostAvatar.getPosition();
+		} else {
+			System.out.println("Unable to find ghost avatar in list");
+			return null;
 		}
 	}
 }

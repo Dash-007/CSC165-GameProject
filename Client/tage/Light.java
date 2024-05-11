@@ -51,7 +51,7 @@ public class Light
 		SPOTLIGHT	//
 	}
 
-	private LightType lightType = LightType.POSITIONAL;
+	private LightType lightType = LightType.SPOTLIGHT;
 	private int index;
 	private float[] location = { 0.0f, 2.0f, 0.0f };
 	private float[] ambient = { 0.3f, 0.3f, 0.3f, 1.0f };
