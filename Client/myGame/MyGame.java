@@ -195,7 +195,7 @@ public class MyGame extends VariableFrameRateGame
 
 		// build car
 		carNew = new GameObject(GameObject.root(), carShape, carTexture);
-		initialTranslation = (new Matrix4f()).translation(9.0f,0.1f,-5.0f);
+		initialTranslation = (new Matrix4f()).translation(9.0f,0.5f,80.0f);
 		carNew.setLocalTranslation(initialTranslation);
 		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
 		carNew.setLocalRotation(initialRotation);
