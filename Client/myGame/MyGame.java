@@ -626,13 +626,13 @@ public class MyGame extends VariableFrameRateGame
 					(engine.getHUDmanager()).setHUD1(rematch, hud1Color, 860, 500);
 				}
 
-				String select = "Select an Avatar";
+				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
 				Vector3f hud2Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD2(select, hud2Color, 860, 100);
+				(engine.getHUDmanager()).setHUD2(select, hud2Color, 860, 540);
 			} else {
-				String select = "Select an Avatar";
+				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
 				Vector3f hud1Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD1(select, hud1Color, 860, 100);
+				(engine.getHUDmanager()).setHUD1(select, hud1Color, 960, 540);
 			}
 		}
 	}
@@ -753,7 +753,7 @@ public class MyGame extends VariableFrameRateGame
 
 			//update audience
 			audienceS.updateAnimation();			
-
+		
 			// update camera
 			orbitController.updateCameraPosition();
 
@@ -811,6 +811,7 @@ public class MyGame extends VariableFrameRateGame
 					time = String.valueOf(elapsedTime);
 				}
 			}
+			
 		}
 	}
 
@@ -933,6 +934,7 @@ public class MyGame extends VariableFrameRateGame
 					audienceS.stopAnimation();
 					break;
 				}
+
 			}
 		} else {
 			switch (e.getKeyCode()) {
@@ -956,7 +958,7 @@ public class MyGame extends VariableFrameRateGame
 					update();
 					break;
 				}
-				case KeyEvent.VK_3:
+				case KeyEvent.VK_ENTER:
 				{
 					selectAvatar = false;
 					update();
