@@ -68,7 +68,7 @@ public class MyGame extends VariableFrameRateGame
 	private PhysicsObject avt, car, planeP, npcOne, npcTwo;
 	private PhysicsObject cone1P, cone2P, cone3P, cone4P, cone5P, cone6P, cone7P, cone8P, cone9P, cone10P;
 
-	private boolean running = false;
+	private boolean running = true;
 	private float vals[] = new float[16];
 
 	// For Audio
@@ -197,7 +197,7 @@ public class MyGame extends VariableFrameRateGame
 
 		// build car
 		carNew = new GameObject(GameObject.root(), carShape, carTexture);
-		initialTranslation = (new Matrix4f()).translation(9.0f,0.1f,-5.0f);
+		initialTranslation = (new Matrix4f()).translation(9.0f,0.5f,80.0f);
 		carNew.setLocalTranslation(initialTranslation);
 		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(180.0f));
 		carNew.setLocalRotation(initialRotation);
@@ -627,12 +627,12 @@ public class MyGame extends VariableFrameRateGame
 				}
 
 				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
-				Vector3f hud2Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD2(select, hud2Color, 860, 540);
+				Vector3f hud2Color = new Vector3f(0,1,0);
+				(engine.getHUDmanager()).setHUD2(select, hud2Color, 700, 540);
 			} else {
 				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
-				Vector3f hud1Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD1(select, hud1Color, 960, 540);
+				Vector3f hud1Color = new Vector3f(0,1,0);
+				(engine.getHUDmanager()).setHUD1(select, hud1Color, 700, 540);
 			}
 		}
 	}
