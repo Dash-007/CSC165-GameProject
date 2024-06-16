@@ -46,10 +46,10 @@ public class MyGame extends VariableFrameRateGame
 	private Matrix4f initialTranslation, initialRotation, initialScale;
 	private double startTime, prevTime, elapsedTime, amt;
 
-	private GameObject tor, avatar, x, y, z, terr, audience;
+	private GameObject tor, avatar, x, y, z, terr, audience, audience2, audience3, audience4;
 	private ObjShape torS, ghostS, dolS, linxS, linyS, linzS, terrS;
 	private AnimatedShape audienceS;
-	private TextureImage doltx, ghostT, hillsMap, hills, audienceT;
+	private TextureImage doltx, ghostT, hillsMap, hills, audienceT, audienceT2;
 	private Light light, playerLight, ghostLight;
 
 	private String serverAddress;
@@ -68,7 +68,7 @@ public class MyGame extends VariableFrameRateGame
 	private PhysicsObject avt, car, planeP, npcOne, npcTwo;
 	private PhysicsObject cone1P, cone2P, cone3P, cone4P, cone5P, cone6P, cone7P, cone8P, cone9P, cone10P;
 
-	private boolean running = false;
+	private boolean running = true;
 	private float vals[] = new float[16];
 
 	// For Audio
@@ -142,9 +142,10 @@ public class MyGame extends VariableFrameRateGame
 		npcShape = new ImportedModel("greenCar.obj");
 		npcShape2 = new ImportedModel("car.obj");
 
-		audienceS = new AnimatedShape("npc.rkm", "npc.rks");
-		audienceS.loadAnimation("clap", "clap.rka");
-		audienceS.loadAnimation("jumping", "jumping.rka");
+		audienceS = new AnimatedShape("guy.rkm", "guy.rks");
+		audienceS.loadAnimation("JUMPguy", "JUMPguy.rka");
+		audienceS.loadAnimation("WAVEguy", "WAVEguy.rka");
+		
 	}
 
 	@Override
@@ -163,7 +164,8 @@ public class MyGame extends VariableFrameRateGame
 		npcTex = new TextureImage("greenCar.jpg");
 		npcTex2 = new TextureImage("car.png");
 
-		audienceT = new TextureImage("npc.jpg");
+		audienceT = new TextureImage("guyRED.jpg");
+		audienceT2 = new TextureImage("guyGREEN.jpg");
 	}
 
 	@Override
@@ -300,6 +302,29 @@ public class MyGame extends VariableFrameRateGame
 				
 		//build audience
 		audience = new GameObject(GameObject.root(), audienceS, audienceT);
+		initialTranslation = (new Matrix4f()).translation(5.5f,1.0f,75.0f);
+		audience.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		audience.setLocalScale(initialScale);
+
+		audience2 = new GameObject(GameObject.root(), audienceS, audienceT2);
+		initialTranslation = (new Matrix4f()).translation(15.5f,1.0f,75.0f);
+		audience2.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		audience2.setLocalScale(initialScale);
+
+		audience3 = new GameObject(GameObject.root(), audienceS, audienceT);
+		initialTranslation = (new Matrix4f()).translation(5.5f,1.0f,-75.0f);
+		audience3.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		audience3.setLocalScale(initialScale);
+
+		audience4 = new GameObject(GameObject.root(), audienceS, audienceT2);
+		initialTranslation = (new Matrix4f()).translation(15.5f,1.0f,-75.0f);
+		audience4.setLocalTranslation(initialTranslation);
+		initialScale = (new Matrix4f()).scaling(0.2f);
+		audience4.setLocalScale(initialScale);
+
 	}
 
 	@Override
@@ -601,13 +626,13 @@ public class MyGame extends VariableFrameRateGame
 					(engine.getHUDmanager()).setHUD1(rematch, hud1Color, 860, 500);
 				}
 
-				String select = "Select an Avatar";
-				Vector3f hud2Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD2(select, hud2Color, 860, 100);
+				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
+				Vector3f hud2Color = new Vector3f(0,1,0);
+				(engine.getHUDmanager()).setHUD2(select, hud2Color, 700, 540);
 			} else {
-				String select = "Select an Avatar";
-				Vector3f hud1Color = new Vector3f(1,0,0);
-				(engine.getHUDmanager()).setHUD1(select, hud1Color, 860, 100);
+				String select = "SELECT AN AVATAR:  1-red   2-green   ENTER-confirm";
+				Vector3f hud1Color = new Vector3f(0,1,0);
+				(engine.getHUDmanager()).setHUD1(select, hud1Color, 700, 540);
 			}
 		}
 	}
@@ -662,6 +687,8 @@ public class MyGame extends VariableFrameRateGame
 						go.setLocalRotation(mat3);
 					}
 				}
+
+
 			}
 
 			engineSound.setLocation(carNew.getWorldLocation());
@@ -725,8 +752,8 @@ public class MyGame extends VariableFrameRateGame
 
 
 			//update audience
-			audienceS.updateAnimation();
-
+			audienceS.updateAnimation();			
+		
 			// update camera
 			orbitController.updateCameraPosition();
 
@@ -784,6 +811,7 @@ public class MyGame extends VariableFrameRateGame
 					time = String.valueOf(elapsedTime);
 				}
 			}
+			
 		}
 	}
 
@@ -889,16 +917,16 @@ public class MyGame extends VariableFrameRateGame
 					running = !running;
 					break;
 				}
-				case KeyEvent.VK_1:
+				case KeyEvent.VK_J:
 				{
 					audienceS.stopAnimation();
-					audienceS.playAnimation("jumping", 0.5f, AnimatedShape.EndType.LOOP, 0);
+					audienceS.playAnimation("JUMPguy", 0.5f, AnimatedShape.EndType.LOOP, 0);
 					break;
 				}
-				case KeyEvent.VK_2:
+				case KeyEvent.VK_V:
 				{
 					audienceS.stopAnimation();
-					audienceS.playAnimation("clap", 0.5f, AnimatedShape.EndType.LOOP, 0);
+					audienceS.playAnimation("WAVEguy", 0.5f, AnimatedShape.EndType.LOOP, 0);
 					break;
 				}
 				case KeyEvent.VK_0:
@@ -906,6 +934,7 @@ public class MyGame extends VariableFrameRateGame
 					audienceS.stopAnimation();
 					break;
 				}
+
 			}
 		} else {
 			switch (e.getKeyCode()) {
@@ -929,7 +958,7 @@ public class MyGame extends VariableFrameRateGame
 					update();
 					break;
 				}
-				case KeyEvent.VK_3:
+				case KeyEvent.VK_ENTER:
 				{
 					selectAvatar = false;
 					update();
